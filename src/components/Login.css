@@ -16,7 +16,6 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   min-height: 100vh;
-  overflow: hidden;
 }
 
 .login-container {
@@ -26,6 +25,7 @@ body {
   min-height: 100vh;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 .login-card {
