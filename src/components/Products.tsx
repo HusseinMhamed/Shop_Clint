@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import StoreStructureSidebar from "./StoreStructureSidebar.tsx";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 const apiUrl = "http://localhost:5000";
 
 interface IProduct {
@@ -15,17 +15,45 @@ interface IProduct {
   model: string;
 }
 const Products = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  console.log(
-    "Current search parameters:",
-    Object.fromEntries(searchParams.entries()),
-  );
+
+  const filterByQueryParams = ({
+    tId,
+    cId,
+    mId,
+  }: {
+    tId?: string;
+    cId?: string;
+    mId?: string;
+  }) => {
+    if (mId) {
+      setSearchParams({
+        model: mId,
+        ...(tId && { type: tId }),
+        ...(cId && { category: cId }),
+      });
+    } else if (cId) {
+      setSearchParams({ category: cId, ...(tId && { type: tId }) });
+    } else if (tId) {
+      setSearchParams({ type: tId });
+    } else {
+      setSearchParams({});
+    }
+  };
+
   const [products, setProducts] = useState<IProduct[]>([]);
 
   async function fetchProducts() {
     try {
-      const response = await axios.get(`${apiUrl}/products/all`);
-      console.log("Fetched products:", response.data?.products);
+      const OBG = Object.fromEntries(searchParams.entries());
+      let URLrequest = `${apiUrl}/products/all?`;
+      for (let i in OBG) URLrequest += `${i}=${OBG[i]}&`;
+      // console.log("URL", URLrequest);
+      URLrequest = URLrequest.slice(0, -1);
+      // console.log("Constructed query parameter:", OBG);
+      const response = await axios.get(URLrequest);
+      // console.log("Fetched products:", response.data?.products);
       setProducts(response.data?.products || []);
     } catch (error: any) {
       console.error("Error fetching products:", error.message || error);
@@ -34,20 +62,12 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [searchParams]);
 
   return (
     <div className="flex min-h-screen bg-[#121212]" dir="rtl">
-      {/* <button
-        onClick={() => {
-          setSearchParams({ type: "electronics", category: "phones" });
-        }}
-        className="absolute top-4 left-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Set Search Params
-      </button> */}
       {/* الشريط الجانبي */}
-      <StoreStructureSidebar />
+      <StoreStructureSidebar filterByQueryParams={filterByQueryParams} />
 
       {/* القسم الرئيسي للمنتجات */}
       <main className="flex-grow p-4 md:p-8">
@@ -86,7 +106,7 @@ const Products = () => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-xl font-black text-blue-500">
-                      ${product.price}
+                      {product.price.toLocaleString()} ج.م
                     </span>
                   </div>
 
@@ -97,7 +117,10 @@ const Products = () => {
 
                   {/* زر الإضافة - دائماً في الأسفل */}
                   <div className="mt-auto pt-4">
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-blue-900/20">
+                    <button
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-blue-900/20"
+                      onClick={() => navigate(`/product/${product._id}`)}
+                    >
                       إضافة للسلة
                     </button>
                   </div>

@@ -13,6 +13,7 @@ import Products from "./components/Products.tsx";
 import "./App.css";
 import Loading from "./Loading.jsx";
 import ResponseStateModal from "./ResponseStateModal.jsx";
+import ProductDetails from "./components/Dashbord/components/ProductDetails.tsx";
 
 function App() {
   const { userInfo } = useSelector((state) => state.auth);
@@ -27,6 +28,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
 
           {/* Protected Admin Route */}
           <Route

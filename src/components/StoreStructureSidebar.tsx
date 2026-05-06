@@ -9,6 +9,7 @@ import {
   X, // إضافة أيقونة الإغلاق
 } from "lucide-react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom"; // استيراد الهوك المطلوب
 
 interface IModel {
   _id: string;
@@ -27,7 +28,15 @@ interface IType {
 
 const apiUrl = "http://localhost:5000";
 
-const StoreStructureSidebar = () => {
+const StoreStructureSidebar = ({
+  filterByQueryParams,
+}: {
+  filterByQueryParams: (params: {
+    tId?: string;
+    cId?: string;
+    mId?: string;
+  }) => void;
+}) => {
   const [openTypes, setOpenTypes] = useState<Record<string, boolean>>({});
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
     {},
@@ -37,11 +46,48 @@ const StoreStructureSidebar = () => {
   // حالة جديدة للتحكم في ظهور القائمة في الموبايل
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  const [searchParams] = useSearchParams();
+  // ربط الـ Active States بالـ URL مباشرة أو بالـ State
+  const [activeType, setActiveType] = useState<string | null>(
+    searchParams.get("type"),
+  );
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    searchParams.get("category"),
+  );
+  const [activeModel, setActiveModel] = useState<string | null>(
+    searchParams.get("model"),
+  );
+
   useEffect(() => {
     const fetchStructure = async () => {
       try {
         const response = await axios(`${apiUrl}/productsmetadata/structure`);
-        setStructure(response.data?.data || []);
+        const treeType = [
+          {
+            _id: null,
+            name: "الكل",
+            categories: [],
+          },
+          ...(response.data?.data || []),
+        ];
+        // منطق "تذكر" القوائم المفتوحة بناءً على الرابط عند التحميل لأول مرة
+        const tId = searchParams.get("type");
+        const cId = searchParams.get("category");
+        const mId = searchParams.get("model");
+        if (tId) {
+          setOpenTypes((prev) => ({ ...prev, [tId]: true }));
+          setActiveType(tId);
+        }
+        if (cId) {
+          setOpenCategories((prev) => ({ ...prev, [cId]: true }));
+          setActiveCategory(cId);
+        }
+
+        if (mId) {
+          setActiveModel(mId);
+        }
+
+        setStructure(treeType);
       } catch (error: any) {
         console.error(
           "Error fetching store structure:",
@@ -60,28 +106,26 @@ const StoreStructureSidebar = () => {
     setOpenCategories((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleChosenType = (id: string) => {
-    console.log("Chosen Type ID:", id);
-    setActiveType(id);
+  const handleChosenType = (tId: string) => {
+    setActiveType(tId);
     setActiveCategory(null);
     setActiveModel(null);
+    filterByQueryParams({ tId: tId });
   };
 
   const handleChosenCategory = (tId: string, cId: string) => {
     setActiveType(tId);
     setActiveCategory(cId);
     setActiveModel(null);
+    filterByQueryParams({ cId, tId });
   };
 
   const handleChosenModel = (tId: string, cId: string, mId: string) => {
     setActiveType(tId);
     setActiveCategory(cId);
     setActiveModel(mId);
+    filterByQueryParams({ cId, tId, mId });
   };
-
-  const [activeType, setActiveType] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [activeModel, setActiveModel] = useState<string | null>(null);
 
   return (
     <>
@@ -140,29 +184,29 @@ const StoreStructureSidebar = () => {
                     {type.name}
                   </span>
                 </div>
-                {openTypes[type._id] ? (
-                  <div
-                    className="hover:text-blue-400 p-1 "
-                    onClick={(e) => {
-                      console.log("Toggling Type:", type._id);
-                      e.stopPropagation();
-                      toggleType(type._id);
-                    }}
-                  >
-                    <ChevronDown size={18} />
-                  </div>
-                ) : (
-                  <div
-                    className="hover:text-blue-400 p-1"
-                    onClick={(e) => {
-                      console.log("Toggling Type:", type._id);
-                      e.stopPropagation();
-                      toggleType(type._id);
-                    }}
-                  >
-                    <ChevronRight size={18} />
-                  </div>
-                )}
+                {type.categories &&
+                  type.categories.length > 0 &&
+                  (openTypes[type._id] ? (
+                    <div
+                      className="hover:text-blue-400 p-1 "
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleType(type._id);
+                      }}
+                    >
+                      <ChevronDown size={18} />
+                    </div>
+                  ) : (
+                    <div
+                      className="hover:text-blue-400 p-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleType(type._id);
+                      }}
+                    >
+                      <ChevronRight size={18} />
+                    </div>
+                  ))}
               </button>
 
               {openTypes[type._id] && (
