@@ -14,6 +14,7 @@ import "./App.css";
 import Loading from "./Loading.jsx";
 import ResponseStateModal from "./ResponseStateModal.jsx";
 import ProductDetails from "./components/Dashbord/components/ProductDetails.tsx";
+import EditDeleteProduct from "./components/Dashbord/components/EditDeleteProduct.tsx";
 
 function App() {
   const { userInfo } = useSelector((state) => state.auth);
@@ -29,6 +30,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route
+            path="/product_patch_delete/:id"
+            element={<EditDeleteProduct />}
+          />
 
           {/* Protected Admin Route */}
           <Route
