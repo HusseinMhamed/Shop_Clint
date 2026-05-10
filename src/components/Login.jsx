@@ -73,9 +73,9 @@ const Login = () => {
           </button>
         </form>
         
-        <div className="login-footer">
+        {/* <div className="login-footer">
           <p>Don't have an account? <Link to="/register">Sign up</Link></p>
-        </div>
+        </div> */}
       </div>
       
       {/* Background aesthetic elements */}

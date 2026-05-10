@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import StoreStructureSidebar from "./StoreStructureSidebar.tsx";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-
+import { useSelector } from "react-redux";
 const apiUrl = "http://localhost:5000";
 
 interface IProduct {
@@ -24,6 +24,7 @@ const Products = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<IProduct[]>([]);
+  const { userInfo } = useSelector((state) => state.auth);
 
   const filterByQueryParams = ({
     tId,
@@ -151,12 +152,14 @@ const Products = () => {
                     >
                       عرض التفاصيل
                     </Link>
-                    <Link
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-blue-900/20"
-                      to={`/product_patch_delete/${product._id}`}
-                    >
-                      تعديل
-                    </Link>
+                    {userInfo && userInfo.role === "admin" && (
+                      <Link
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-blue-900/20"
+                        to={`/product_patch_delete/${product._id}`}
+                      >
+                        تعديل
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

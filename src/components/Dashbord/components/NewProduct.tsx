@@ -191,7 +191,7 @@ function NewProduct() {
     });
     if (hasErrors) return;
     Dispatch(loading());
-    console.log("Submitting product:", formData);
+    // console.log("Submitting product:", formData);
     try {
       // Reset form after submission
       const formDataSend = new FormData();
@@ -225,11 +225,16 @@ function NewProduct() {
           },
         },
       );
-      console.log("Product created successfully:", response.data);
+      // console.log("Product created successfully:", response.data);
       setFormData(initialFormData);
       setPreviews([]);
+      setTimeout(() => alert("تمت إضافة المنتج بنجاح"), 500);
     } catch (error: any) {
-      console.log("Error creating product:", error.response || error);
+      console.log(
+        "Error creating product:",
+        error.response.data.message || error,
+      );
+      setTimeout(() => alert(error.response.data.message || error), 500);
     }
     Dispatch(close());
   };

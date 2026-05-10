@@ -15,6 +15,8 @@ import Loading from "./Loading.jsx";
 import ResponseStateModal from "./ResponseStateModal.jsx";
 import ProductDetails from "./components/Dashbord/components/ProductDetails.tsx";
 import EditDeleteProduct from "./components/Dashbord/components/EditDeleteProduct.tsx";
+import DynamicContactManager from "./components/Dashbord/components/DynamicContactManager.tsx";
+import ContactSection from "./components/Dashbord/components/ContactOverlay.jsx";
 
 function App() {
   const { userInfo } = useSelector((state) => state.auth);
@@ -30,10 +32,18 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+
           <Route
             path="/product_patch_delete/:id"
-            element={<EditDeleteProduct />}
+            element={
+              userInfo && userInfo.role === "admin" ? (
+                <EditDeleteProduct />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
+          <Route path="/about" element={<DynamicContactManager />} />
 
           {/* Protected Admin Route */}
           <Route
@@ -56,6 +66,7 @@ function App() {
           />
         </Routes>
       </Router>
+      <ContactSection />
     </>
   );
 }

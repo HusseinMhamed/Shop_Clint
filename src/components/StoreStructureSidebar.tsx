@@ -152,6 +152,7 @@ const StoreStructureSidebar = ({
           md:sticky md:translate-x-0 md:z-50
           ${isMobileOpen ? "translate-x-0" : "translate-x-full"}
           w-72 bg-[#1a1a1ae9] backdrop-blur-md overflow-y-auto p-4 border-l border-gray-800 shadow-xl
+          
         `}
         dir="rtl"
       >
@@ -251,7 +252,7 @@ const StoreStructureSidebar = ({
                               key={model._id}
                               className={`flex items-center gap-2 p-2 text-xs text-gray-500 hover:text-white cursor-pointer ${activeModel === model._id ? "bg-gray-700/50 rounded-md" : ""}`}
                               onClick={() => {
-                                console.log("Chosen Model ID:", model._id);
+                                // console.log("Chosen Model ID:", model._id);
                                 handleChosenModel(
                                   type._id,
                                   category._id,
