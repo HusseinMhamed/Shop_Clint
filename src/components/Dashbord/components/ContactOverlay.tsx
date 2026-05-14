@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 import {
   Mail,
   Phone,
@@ -27,8 +28,6 @@ const getIcon = (type: string) => {
       return <Type size={22} className="text-gray-600" />;
   }
 };
-
-const apiUrl = "http://localhost:5000";
 
 const FloatingContactSupport = () => {
   // const [isOpen, setIsOpen] = useState(false);
@@ -61,7 +60,9 @@ const FloatingContactSupport = () => {
         try {
           setFetching(true);
           dispatch(loading());
-          const response = await axios.get(`${apiUrl}/contact/contact-info`);
+          const response = await axios.get(
+            `${SERVER_URL}/contact/contact-info`,
+          );
           const contactsData = response.data.contacts;
 
           if (contactsData) {
@@ -116,7 +117,7 @@ const FloatingContactSupport = () => {
               </h2>
 
               {/* الكرت الداخلي المنقط */}
-              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 bg-gray-50">
+              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 bg-gray-200">
                 <div className="text-center mb-6">
                   <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center text-blue-600 text-2xl font-bold">
                     <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
@@ -131,7 +132,7 @@ const FloatingContactSupport = () => {
 
                 {/* قائمة الحقول - أضفنا pl-2 بدلاً من pr-2 لأننا في وضع rtl */}
                 <div
-                  className="space-y-4 max-h-[350px] overflow-y-auto pl-2 custom-scrollbar"
+                  className="space-y-4 max-h-[350px] overflow-y-auto p-2 custom-scrollbar"
                   dir="rtl"
                 >
                   {contacts.length > 0 ? (

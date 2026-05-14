@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 import { useDispatch } from "react-redux";
 import { loading, close } from "../../../slices/SuccessFaildState/SFS.ts";
 import { Tag, Star, ArrowRight, Percent } from "lucide-react"; // أيقونات إضافية لمظهر أفضل
@@ -24,8 +25,6 @@ export interface IProduct {
   updatedAt: string;
 }
 
-const apiUrl = "http://localhost:5000";
-
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
@@ -36,7 +35,7 @@ const ProductDetails: React.FC = () => {
     const fetchProduct = async () => {
       dispatch(loading());
       try {
-        const response = await axios.get(`${apiUrl}/products/${id}`);
+        const response = await axios.get(`${SERVER_URL}/products/${id}`);
         const data = response.data?.data;
         setProduct(data);
         if (data?.images?.length > 0) {

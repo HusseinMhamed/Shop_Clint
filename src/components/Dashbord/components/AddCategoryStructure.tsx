@@ -7,13 +7,15 @@ import React, {
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../Store.Types.ts";
 import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
-import axios from "axios";
+// import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 // تعريف أنواع البيانات لتتوافق مع الـ Mongoose Schema
 interface IType {
   _id: string;
   name: string;
 }
-const apiUrl = "http://localhost:5000";
+// const apiUrl = "http://localhost:5000";
 interface ICategory extends IType {
   parentType: string;
 }
@@ -47,12 +49,19 @@ const AddCategoryStructure: React.FC = () => {
         Dispatch(loading());
         // هنا يتم جلب الأنواع من الـ API أو Redux
         try {
-          const response = await axios.get(`${apiUrl}/productsmetadata/types`);
+          const response = await axios.get(
+            `${SERVER_URL}/productsmetadata/types`,
+          );
           // console.log("00000000", response.data);
           setTypes(response.data?.data || []);
           setFormData(initialFormData);
+          // setTimeout(() => alert("تم الحفظ بنجاح"), 500);
         } catch (error: any) {
           console.log("Error fetching types:", error.response || error);
+          setTimeout(
+            () => alert("هناك مشكلة : " + error.response.data.message || error),
+            500,
+          );
         }
         Dispatch(close());
       };
@@ -88,10 +97,11 @@ const AddCategoryStructure: React.FC = () => {
           // هنا يتم جلب الفئات من الـ API أو Redux
           try {
             const response = await axios.get(
-              `${apiUrl}/productsmetadata/categories/${selectedTypeIndex !== -1 ? types[selectedTypeIndex]?._id : ""}`,
+              `${SERVER_URL}/productsmetadata/categories/${selectedTypeIndex !== -1 ? types[selectedTypeIndex]?._id : ""}`,
             );
-            console.log("1111111111", response.data);
+            // console.log("1111111111", response.data);
             setCategories(response.data?.data || []);
+            // setTimeout(() => alert("تم الحفظ بنجاح"), 500);
             // setFormData(initialFormData);
           } catch (error: any) {
             console.log("Error fetching categories:", error.response || error);
@@ -110,12 +120,20 @@ const AddCategoryStructure: React.FC = () => {
     if (activeTab === "type") {
       // إرسال طلب لإنشاء نوع جديد
       try {
-        const response = await axios.post(`${apiUrl}/productsmetadata/types`, {
-          name: formData.name,
-        });
-        console.log("Type created successfully:", response.data);
+        const response = await axios.post(
+          `${SERVER_URL}/productsmetadata/types`,
+          {
+            name: formData.name,
+          },
+        );
+        // console.log("Type created successfully:", response.data);
+        setTimeout(() => alert("تم الحفظ بنجاح"), 500);
       } catch (error: any) {
         console.log("Error creating type:", error.response || error);
+        setTimeout(
+          () => alert("هناك مشكلة : " + error.response.data.message || error),
+          500,
+        );
       }
     } else if (activeTab === "category") {
       // إرسال طلب لإنشاء فئة جديدة
@@ -124,15 +142,20 @@ const AddCategoryStructure: React.FC = () => {
           throw new Error("Please select a type for the category.");
         }
         const response = await axios.post(
-          `${apiUrl}/productsmetadata/categories`,
+          `${SERVER_URL}/productsmetadata/categories`,
           {
             name: formData.name,
             typeId: types[formData.selectedTypeIndex]?._id || "",
           },
         );
-        console.log("Category created successfully:", response.data);
+        // console.log("Category created successfully:", response.data);
+        setTimeout(() => alert("تم الحفظ بنجاح"), 500);
       } catch (error: any) {
         console.log("Error creating category:", error.response || error);
+        setTimeout(
+          () => alert("هناك مشكلة : " + error.response.data.message || error),
+          500,
+        );
       }
     } else if (activeTab === "model") {
       try {
@@ -142,13 +165,24 @@ const AddCategoryStructure: React.FC = () => {
         ) {
           throw new Error("Please select a type and category for the model.");
         }
-        const response = await axios.post(`${apiUrl}/productsmetadata/models`, {
-          name: formData.name,
-          categoryId: categories[formData.selectedCategoryIndex]?._id || "",
-        });
-        console.log("Model created successfully:", response.data);
+        const response = await axios.post(
+          `${SERVER_URL}/productsmetadata/models`,
+          {
+            name: formData.name,
+            categoryId: categories[formData.selectedCategoryIndex]?._id || "",
+          },
+        );
+        // console.log("Model created successfully:", response.data);
+        setTimeout(() => alert("تم الحفظ بنجاح"), 500);
       } catch (error: any) {
-        console.log("Error creating model:", error.response || error);
+        console.log(
+          "Error creating model:",
+          error.response.data.message || error,
+        );
+        setTimeout(
+          () => alert("هناك مشكلة : " + error.response.data.message || error),
+          500,
+        );
       }
     }
 

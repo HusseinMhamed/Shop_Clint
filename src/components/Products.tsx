@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../AxiosApi.jsx";
+import { SERVER_URL } from "../Constant.js";
 import StoreStructureSidebar from "./StoreStructureSidebar.tsx";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-const apiUrl = "http://localhost:5000";
 
 interface IProduct {
   _id: string;
@@ -53,7 +53,7 @@ const Products = () => {
   async function fetchProducts() {
     try {
       const OBG = Object.fromEntries(searchParams.entries());
-      let URLrequest = `${apiUrl}/products/all?`;
+      let URLrequest = `${SERVER_URL}/products/all?`;
       for (let i in OBG) URLrequest += `${i}=${OBG[i]}&`;
       URLrequest = URLrequest.slice(0, -1);
       const response = await axios.get(URLrequest);

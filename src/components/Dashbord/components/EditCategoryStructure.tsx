@@ -7,7 +7,8 @@ import React, {
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../Store.Types.ts";
 import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
-import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 
 interface IType {
   _id: string;
@@ -19,8 +20,6 @@ interface ICategory extends IType {
 interface IModel extends IType {
   parentCategory: string;
 }
-
-const apiUrl = "http://localhost:5000";
 
 const initialFormData = {
   selectedTypeIndex: -1,
@@ -44,7 +43,9 @@ const EditCategoryStructure: React.FC = () => {
     const fetchTypes = async () => {
       Dispatch(loading());
       try {
-        const response = await axios.get(`${apiUrl}/productsmetadata/types`);
+        const response = await axios.get(
+          `${SERVER_URL}/productsmetadata/types`,
+        );
         setTypes(response.data?.data || []);
         setFormData(initialFormData);
       } catch (error: any) {
@@ -94,7 +95,7 @@ const EditCategoryStructure: React.FC = () => {
     Dispatch(loading());
     try {
       const response = await axios.get(
-        `${apiUrl}/productsmetadata/categories/${typeId}`,
+        `${SERVER_URL}/productsmetadata/categories/${typeId}`,
       );
       setCategories(response.data?.data || []);
     } catch (error) {
@@ -107,7 +108,7 @@ const EditCategoryStructure: React.FC = () => {
     Dispatch(loading());
     try {
       const response = await axios.get(
-        `${apiUrl}/productsmetadata/models/${categoryId}`,
+        `${SERVER_URL}/productsmetadata/models/${categoryId}`,
       );
       setModels(response.data?.data || []);
     } catch (error) {
@@ -141,15 +142,23 @@ const EditCategoryStructure: React.FC = () => {
 
     Dispatch(loading());
     try {
-      await axios.patch(`${apiUrl}/productsmetadata/${endpoint}/${idToEdit}`, {
-        name: formData.newName,
-      });
+      await axios.patch(
+        `${SERVER_URL}/productsmetadata/${endpoint}/${idToEdit}`,
+        {
+          name: formData.newName,
+        },
+      );
       setFormData(initialFormData);
       setActiveTab(activeTab); // لإعادة التحميل
-      //   alert("تم التعديل بنجاح");
+      setTimeout(() => {
+        alert("تم التعديل بنجاح");
+      }, 500);
     } catch (error: any) {
       console.error("Error editing:", error);
-      alert(`فشل التعديل: ${error.response?.data?.message || error.message}`);
+
+      setTimeout(() => {
+        alert(`فشل التعديل: ${error.response?.data?.message || error.message}`);
+      }, 500);
     }
     Dispatch(close());
   };

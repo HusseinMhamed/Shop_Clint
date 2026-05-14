@@ -43,7 +43,18 @@ function App() {
               )
             }
           />
-          <Route path="/about" element={<DynamicContactManager />} />
+          <Route
+            path="/about"
+            element={
+              userInfo && userInfo.role === "admin" ? (
+                <DynamicContactManager />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+
+          {/* <Route path="/about" element={} /> */}
 
           {/* Protected Admin Route */}
           <Route
@@ -58,12 +69,7 @@ function App() {
           />
 
           {/* Redirect root to products or login depending on auth state */}
-          <Route
-            path="/"
-            element={
-              <Navigate to={userInfo ? "/products" : "/login"} replace />
-            }
-          />
+          <Route path="/" element={<Navigate to={"/products"} replace />} />
         </Routes>
       </Router>
       <ContactSection />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, type ChangeEvent } from "react";
-import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../Store.Types.ts";
 import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
@@ -41,7 +42,6 @@ interface ICategory extends IType {
 interface IModel extends IType {
   parentCategory: string;
 }
-const apiUrl = "http://localhost:5000";
 function NewProduct() {
   const Dispatch = useDispatch<AppDispatch>();
 
@@ -62,7 +62,9 @@ function NewProduct() {
       Dispatch(loading());
       // هنا يتم جلب الأنواع من الـ API أو Redux
       try {
-        const response = await axios.get(`${apiUrl}/productsmetadata/types`);
+        const response = await axios.get(
+          `${SERVER_URL}/productsmetadata/types`,
+        );
         setTypes(response.data?.data || []);
       } catch (error: any) {
         console.log("Error fetching types:", error.response || error);
@@ -96,7 +98,7 @@ function NewProduct() {
       // هنا يتم جلب الفئات من الـ API أو Redux
       try {
         const response = await axios.get(
-          `${apiUrl}/productsmetadata/categories/${selectedTypeIndex >= 0 ? types[selectedTypeIndex]?._id : ""}`,
+          `${SERVER_URL}/productsmetadata/categories/${selectedTypeIndex >= 0 ? types[selectedTypeIndex]?._id : ""}`,
         );
         setCategories(response.data?.data || []);
         setFormData((prev) => ({
@@ -114,7 +116,7 @@ function NewProduct() {
       Dispatch(loading());
       try {
         const response = await axios.get(
-          `${apiUrl}/productsmetadata/models/${selectedCategoryIndex >= 0 ? categories[selectedCategoryIndex]?._id : ""}`,
+          `${SERVER_URL}/productsmetadata/models/${selectedCategoryIndex >= 0 ? categories[selectedCategoryIndex]?._id : ""}`,
         );
         setModels(response.data?.data || []);
         setFormData((prev) => ({
@@ -155,41 +157,64 @@ function NewProduct() {
     // Here you would typically send formData to your backend API
 
     setFormErrors(initialFormErrors);
+    let errorObj = {};
     if (!formData.name)
-      setFormErrors((prev) => ({ ...prev, name: "Product name is required." }));
+      // setFormErrors((prev) => ({ ...prev, name: "Product name is required." }));
+      errorObj = { name: "Product name is required." };
     if (!formData.price)
-      setFormErrors((prev) => ({ ...prev, price: "Price is required." }));
+      // setFormErrors((prev) => ({ ...prev, price: "Price is required." }));
+      errorObj = { ...errorObj, price: "Price is required." };
     if (formData.images.length === 0)
-      setFormErrors((prev) => ({
-        ...prev,
-        images: "At least one image is required.",
-      }));
+      // setFormErrors((prev) => ({
+      //   ...prev,
+      //   images: "At least one image is required.",
+      // }));
+      errorObj = { ...errorObj, images: "At least one image is required." };
     if (formData.images.length > 6)
-      setFormErrors((prev) => ({
-        ...prev,
+      // setFormErrors((prev) => ({
+      //   ...prev,
+      //   images: "You can upload a maximum of 6 images.",
+      // }));
+      errorObj = {
+        ...errorObj,
         images: "You can upload a maximum of 6 images.",
-      }));
+      };
     if (formData.selectedTypeIndex < 0)
-      setFormErrors((prev) => ({
-        ...prev,
+      // setFormErrors((prev) => ({
+      //   ...prev,
+      //   type: "Please select a type.",
+      // }));
+      errorObj = {
+        ...errorObj,
         type: "Please select a type.",
-      }));
+      };
     if (formData.selectedCategoryIndex < 0)
-      setFormErrors((prev) => ({
-        ...prev,
+      // setFormErrors((prev) => ({
+      //   ...prev,
+      //   category: "Please select a category.",
+      // }));
+      errorObj = {
+        ...errorObj,
         category: "Please select a category.",
-      }));
+      };
     if (formData.selectedModelIndex < 0)
-      setFormErrors((prev) => ({
-        ...prev,
+      // setFormErrors((prev) => ({
+      //   ...prev,
+      //   model: "Please select a model.",
+      // }));
+      errorObj = {
+        ...errorObj,
         model: "Please select a model.",
-      }));
+      };
 
     let hasErrors = false;
-    Object.values(formErrors).forEach((error) => {
+    Object.values(errorObj).forEach((error) => {
       if (error) hasErrors = true;
     });
-    if (hasErrors) return;
+    if (hasErrors) {
+      setFormErrors(errorObj);
+      return;
+    }
     Dispatch(loading());
     // console.log("Submitting product:", formData);
     try {
@@ -213,11 +238,9 @@ function NewProduct() {
           formDataSend.append("images", file);
         });
       }
-      // Replace with your actual API endpoint
-      const apiUrl = "http://localhost:5000";
 
       const response = await axios.post(
-        `${apiUrl}/products/create`,
+        `${SERVER_URL}/products/create`,
         formDataSend,
         {
           headers: {

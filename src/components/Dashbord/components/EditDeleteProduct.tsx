@@ -1,10 +1,10 @@
 import React, { useEffect, useState, type ChangeEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 import { useDispatch } from "react-redux";
 import { loading, close } from "../../../slices/SuccessFaildState/SFS.ts";
 
-const apiUrl = "http://localhost:5000";
 // interface/Product.ts
 
 export interface IProduct {
@@ -62,8 +62,8 @@ const ProductAdmin: React.FC = () => {
       Dispatch(loading());
       try {
         const [prodRes, typeRes] = await Promise.all([
-          axios.get(`${apiUrl}/products/${id}`),
-          axios.get(`${apiUrl}/productsmetadata/types`),
+          axios.get(`${SERVER_URL}/products/${id}`),
+          axios.get(`${SERVER_URL}/productsmetadata/types`),
         ]);
         const prodData = prodRes.data.data;
         setTypes(typeRes.data.data);
@@ -92,7 +92,7 @@ const ProductAdmin: React.FC = () => {
   const fetchCategories = async (typeId: string) => {
     try {
       const res = await axios.get(
-        `${apiUrl}/productsmetadata/categories/${typeId}`,
+        `${SERVER_URL}/productsmetadata/categories/${typeId}`,
       );
       setCategories(res.data.data);
     } catch (err) {
@@ -103,7 +103,7 @@ const ProductAdmin: React.FC = () => {
   const fetchModels = async (categoryId: string) => {
     try {
       const res = await axios.get(
-        `${apiUrl}/productsmetadata/models/${categoryId}`,
+        `${SERVER_URL}/productsmetadata/models/${categoryId}`,
       );
       setModels(res.data.data);
     } catch (err) {
@@ -176,18 +176,18 @@ const ProductAdmin: React.FC = () => {
     console.log(product);
     Dispatch(loading());
     try {
-      await axios.put(`${apiUrl}/products/${id}`, product);
+      await axios.put(`${SERVER_URL}/products/${id}`, product);
 
       // alert("تم التحديث بنجاح");
       setTimeout(() => {
         alert("تم التحديث بنجاح");
-      }, 100);
+      }, 500);
     } catch (err: any) {
       setTimeout(() => {
         alert(
           "خطأ في التحديث: " + (err.response?.data?.message || err.message),
         );
-      }, 100);
+      }, 500);
     }
     Dispatch(close());
   };
@@ -480,7 +480,7 @@ const ProductAdmin: React.FC = () => {
                   ) {
                     Dispatch(loading());
                     try {
-                      await axios.delete(`${apiUrl}/products/${id}`);
+                      await axios.delete(`${SERVER_URL}/products/${id}`);
                       navigate("/products");
                     } catch (err) {
                       alert("فشل الحذف");

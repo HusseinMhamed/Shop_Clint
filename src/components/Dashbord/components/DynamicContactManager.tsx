@@ -30,7 +30,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../Store.Types.ts";
 import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
-import axios from "axios";
+import axios from "../../../AxiosApi.jsx";
+import { SERVER_URL } from "../../../Constant.js";
 
 // --- مكون الحقل القابل للسحب (Sortable Item) ---
 // --- مكون الحقل القابل للسحب (Sortable Item) المحدث ---
@@ -144,7 +145,6 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
     </div>
   );
 };
-const apiUrl = "http://localhost:5000";
 // --- المكون الرئيسي ---
 const DynamicContactManager = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -156,10 +156,10 @@ const DynamicContactManager = () => {
       try {
         // setLoading(true);
         dispatch(loading());
-        const response = await axios.get(`${apiUrl}/contact/contact-info`); // استبدله برابط الباك إند الخاص بك
+        const response = await axios.get(`${SERVER_URL}/contact/contact-info`); // استبدله برابط الباك إند الخاص بك
         const contacts = response.data.contacts;
         if (!contacts) throw new Error("هناك مشكلة والروت خاطأ");
-        console.log(contacts);
+        // console.log(contacts);
         if (contacts && contacts.length > 0) {
           setContacts(contacts);
         }
@@ -256,11 +256,11 @@ const DynamicContactManager = () => {
 
     if (!validate()) return;
     try {
-      console.log(contacts);
+      // console.log(contacts);
 
       dispatch(loading());
       // إرسال المصفوفة كاملة للسيرفر (التحديث يتم ككتلة واحدة للمحافظة على الترتيب)
-      const response = await axios.put(`${apiUrl}/contact/contact-info`, {
+      const response = await axios.put(`${SERVER_URL}/contact/contact-info`, {
         contacts,
       });
       const ResposneContacts = response.data.contacts;

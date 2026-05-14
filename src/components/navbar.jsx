@@ -109,13 +109,13 @@ function ResponsiveAppBar() {
                   {/* قائمة المستخدم المنسدلة */}
                   {isUserMenuOpen && (
                     <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 text-gray-800 animate-in fade-in zoom-in duration-150">
-                      <Link
+                      {/* <Link
                         to="/profile"
                         className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition-colors"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <User size={16} /> Profile
-                      </Link>
+                      </Link> */}
                       <hr className="my-1 border-gray-100" />
                       <button
                         onClick={handleLogout}

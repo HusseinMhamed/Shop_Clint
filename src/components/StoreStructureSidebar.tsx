@@ -8,7 +8,8 @@ import {
   Menu, // إضافة أيقونة القائمة
   X, // إضافة أيقونة الإغلاق
 } from "lucide-react";
-import axios from "axios";
+import axios from "../AxiosApi.jsx";
+import { SERVER_URL } from "../Constant.js";
 import { useSearchParams } from "react-router-dom"; // استيراد الهوك المطلوب
 
 interface IModel {
@@ -25,8 +26,6 @@ interface IType {
   name: string;
   categories: ICategory[];
 }
-
-const apiUrl = "http://localhost:5000";
 
 const StoreStructureSidebar = ({
   filterByQueryParams,
@@ -61,7 +60,9 @@ const StoreStructureSidebar = ({
   useEffect(() => {
     const fetchStructure = async () => {
       try {
-        const response = await axios(`${apiUrl}/productsmetadata/structure`);
+        const response = await axios(
+          `${SERVER_URL}/productsmetadata/structure`,
+        );
         const treeType = [
           {
             _id: null,

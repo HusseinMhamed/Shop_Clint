@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { useLoginMutation } from '../slices/authApiSlice';
-import { setCredentials } from '../slices/authSlice';
-import './Login.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useLoginMutation } from "../slices/authApiSlice";
+import { setCredentials } from "../slices/authSlice";
+import "./Login.css";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -18,10 +18,11 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await login({ email, password }).unwrap();
+      // console.log(res);
       dispatch(setCredentials({ ...res }));
-      navigate('/');
+      navigate("/");
     } catch (err) {
-      console.error('Failed to log in', err);
+      console.error("Failed to log in", err);
     }
   };
 
@@ -32,10 +33,10 @@ const Login = () => {
           <h2>Welcome Back</h2>
           <p>Please enter your details to sign in.</p>
         </div>
-        
+
         {error && (
           <div className="error-message">
-            {error?.data?.message || 'Login failed. Please try again.'}
+            {error?.data?.message || "Login failed. Please try again."}
           </div>
         )}
 
@@ -64,20 +65,16 @@ const Login = () => {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="login-button" 
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+          <button type="submit" className="login-button" disabled={isLoading}>
+            {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-        
+
         {/* <div className="login-footer">
           <p>Don't have an account? <Link to="/register">Sign up</Link></p>
         </div> */}
       </div>
-      
+
       {/* Background aesthetic elements */}
       <div className="bg-shape shape-1"></div>
       <div className="bg-shape shape-2"></div>
