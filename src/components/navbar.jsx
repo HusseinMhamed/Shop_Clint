@@ -7,7 +7,6 @@ import {
   X,
   ChevronDown,
   LogOut,
-  User,
   LayoutDashboard,
   Info,
   ShoppingBag,
@@ -50,6 +49,7 @@ function ResponsiveAppBar() {
     });
     pages.push({ name: "About", path: "/about", icon: <Info size={18} /> });
   }
+  // console.log(userInfo)
 
   return (
     <>
@@ -127,12 +127,20 @@ function ResponsiveAppBar() {
                   )}
                 </div>
               ) : (
-                <Link
-                  to="/login"
-                  className="bg-white text-blue-600 px-5 py-1.5 rounded-full font-bold hover:bg-blue-50 transition-colors text-sm"
-                >
-                  Login
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/login"
+                    className="bg-white text-blue-600 px-5 py-1.5 rounded-full font-bold hover:bg-blue-50 transition-colors text-sm"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="hidden sm:inline-block border border-white/70 text-white px-5 py-1.5 rounded-full font-bold hover:bg-white/10 transition-colors text-sm"
+                  >
+                    Register
+                  </Link>
+                </div>
               )}
 
               {/* زر قائمة الجوال */}
@@ -160,6 +168,15 @@ function ResponsiveAppBar() {
                   {page.icon} {page.name}
                 </Link>
               ))}
+              {!userInfo && (
+                <Link
+                  to="/register"
+                  onClick={() => setIsNavOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-md text-base font-medium hover:bg-blue-800 transition-colors"
+                >
+                  Register
+                </Link>
+              )}
             </div>
           </div>
         )}

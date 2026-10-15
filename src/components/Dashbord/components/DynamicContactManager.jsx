@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import {
   Trash2,
   Plus,
@@ -10,15 +10,13 @@ import {
   Eye,
   GripVertical,
 } from "lucide-react";
-// مكتبات السحب والإفلات
 import {
   DndContext,
   closestCenter,
   PointerSensor,
   useSensor,
-  TouchSensor, // 1. إضافة حساس اللمس
+  TouchSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -28,14 +26,11 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../../Store.Types.ts";
-import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
+import { close, loading } from "../../../slices/SuccessFaildState/SFS.js";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
 
-// --- مكون الحقل القابل للسحب (Sortable Item) ---
-// --- مكون الحقل القابل للسحب (Sortable Item) المحدث ---
-const SortableField = ({ field, updateField, deleteField, errors }: any) => {
+const SortableField = ({ field, updateField, deleteField, errors }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: field.id });
 
@@ -45,7 +40,6 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
     zIndex: transform ? 99 : 1,
   };
 
-  // استخراج الأخطاء الخاصة بهذا الحقل تحديداً
   const labelError = errors[`${field.id}-label`];
   const valueError = errors[`${field.id}-value`];
 
@@ -67,7 +61,6 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {/* حقل عنوان الحقل */}
         <div>
           <label className="block text-xs mb-1 text-gray-500">
             عنوان الحقل
@@ -90,7 +83,6 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
           )}
         </div>
 
-        {/* حقل نوع البيانات */}
         <div>
           <label className="block text-xs text-gray-500 mb-1">
             نوع البيانات
@@ -98,7 +90,7 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
           <select
             value={field.type}
             onChange={(e) =>
-              updateField(field.id, "type", e.target.value as any)
+              updateField(field.id, "type", e.target.value)
             }
             className="w-full p-2 border rounded bg-white outline-none focus:ring-2 focus:ring-blue-400"
           >
@@ -111,7 +103,6 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
       </div>
 
       <div className="flex gap-2 items-start">
-        {/* حقل القيمة */}
         <div className="flex-1">
           <label className="block text-xs mb-1 text-gray-500">القيمة</label>
           <input
@@ -133,7 +124,6 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
           )}
         </div>
 
-        {/* زر الحذف */}
         <button
           type="button"
           onClick={() => deleteField(field.id)}
@@ -145,28 +135,25 @@ const SortableField = ({ field, updateField, deleteField, errors }: any) => {
     </div>
   );
 };
-// --- المكون الرئيسي ---
+
 const DynamicContactManager = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const [contacts, setContacts] = useState<any[]>([]);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const dispatch = useDispatch();
+  const [contacts, setContacts] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        // setLoading(true);
         dispatch(loading());
-        const response = await axios.get(`${SERVER_URL}/contact/contact-info`); // استبدله برابط الباك إند الخاص بك
+        const response = await axios.get(`${SERVER_URL}/contact/contact-info`);
         const contacts = response.data.contacts;
         if (!contacts) throw new Error("هناك مشكلة والروت خاطأ");
-        // console.log(contacts);
         if (contacts && contacts.length > 0) {
           setContacts(contacts);
         }
-      } catch (error: any) {
+      } catch (error) {
         console.log("Error fetching data:", error.message || error);
       } finally {
-        // setLoading(false);
         dispatch(close());
       }
     };
@@ -175,14 +162,11 @@ const DynamicContactManager = () => {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      // يتطلب تحريك الماوس 5 بكسل قبل بدء السحب (لمنع التداخل مع النقرات)
       activationConstraint: {
         distance: 5,
       },
     }),
     useSensor(TouchSensor, {
-      // إعدادات الموبايل: يتطلب الضغط المستمر لمدة 250ms أو التحريك لمسافة 5px
-      // هذا يسمح للمستخدم بعمل Scroll للصفحة بشكل طبيعي
       activationConstraint: {
         delay: 250,
         tolerance: 5,
@@ -190,8 +174,7 @@ const DynamicContactManager = () => {
     }),
   );
 
-  // أيقونات العرض
-  const getIcon = (type: string) => {
+  const getIcon = (type) => {
     switch (type) {
       case "email":
         return <Mail size={18} className="text-blue-500" />;
@@ -204,21 +187,17 @@ const DynamicContactManager = () => {
     }
   };
 
-  // التحقق من البيانات
   const validate = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors = {};
 
     contacts.forEach((f) => {
-      // 1. التأكد من عنوان الحقل (Label)
       if (!f.label || !f.label.trim()) {
         newErrors[`${f.id}-label`] = "عنوان الحقل مطلوب";
       }
 
-      // 2. التأكد من القيمة (Value)
       if (!f.value || !f.value.trim()) {
         newErrors[`${f.id}-value`] = "هذا الحقل لا يمكن أن يكون فارغاً";
       }
-      // 3. التأكد من الصيغ الخاصة (Email / Link)
       else if (f.type === "email" && !/\S+@\S+\.\S+/.test(f.value)) {
         newErrors[`${f.id}-value`] = "صيغة بريد غير صحيحة";
       } else if (f.type === "link" && !f.value.startsWith("http")) {
@@ -230,7 +209,7 @@ const DynamicContactManager = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setContacts((items) => {
@@ -241,7 +220,7 @@ const DynamicContactManager = () => {
     }
   };
 
-  const updateField = (id: string, key: string, val: string) => {
+  const updateField = (id, key, val) => {
     setContacts(contacts.map((f) => (f.id === id ? { ...f, [key]: val } : f)));
     if (errors[id]) {
       const updatedErrors = { ...errors };
@@ -250,16 +229,12 @@ const DynamicContactManager = () => {
     }
   };
 
-  // 2. دالة حفظ البيانات وتعديلها في الباك إند
-  const handelSaveData = async (e: FormEvent) => {
+  const handelSaveData = async (e) => {
     e.preventDefault();
 
     if (!validate()) return;
     try {
-      // console.log(contacts);
-
       dispatch(loading());
-      // إرسال المصفوفة كاملة للسيرفر (التحديث يتم ككتلة واحدة للمحافظة على الترتيب)
       const response = await axios.put(`${SERVER_URL}/contact/contact-info`, {
         contacts,
       });
@@ -268,7 +243,7 @@ const DynamicContactManager = () => {
         throw new Error("هناك مشكلة والروت خاطأ");
       setContacts(ResposneContacts);
       setTimeout(() => alert("تم حفظ جميع التغييرات والترتيب بنجاح!"), 500);
-    } catch (error: any) {
+    } catch (error) {
       console.log("Error saving data:", error.response?.data?.error || error);
       setTimeout(() => alert(error.response?.data?.error || error), 500);
     }
@@ -278,7 +253,6 @@ const DynamicContactManager = () => {
   return (
     <div className="p-6 bg-gray-300 min-h-screen" dir="rtl">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* القسم الأول: الإعدادات (مع السحب) */}
         <form
           className="bg-white/60 p-6 rounded-xl shadow-md border border-gray-200"
           onSubmit={handelSaveData}
@@ -321,10 +295,10 @@ const DynamicContactManager = () => {
                     key={field.id}
                     field={field}
                     updateField={updateField}
-                    deleteField={(id: string) =>
+                    deleteField={(id) =>
                       setContacts(contacts.filter((c) => c.id !== id))
                     }
-                    errors={errors} // تأكد من وجود هذا السطر
+                    errors={errors}
                   />
                 ))}
               </div>
@@ -333,16 +307,12 @@ const DynamicContactManager = () => {
 
           <button
             type="submit"
-            // onClick={() =>
-            //   validate() && alert("تم حفظ البيانات والترتيب بنجاح!")
-            // }
             className="w-full mt-6 bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition"
           >
             <Save size={20} /> حفظ جميع التغييرات
           </button>
         </form>
 
-        {/* القسم الثاني: المعاينة (نفس التصميم السابق) */}
         <div className="bg-white/60 p-6 rounded-xl shadow-md border border-gray-200 h-fit sticky top-6">
           <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
             <Eye className="text-blue-600" /> معاينة العرض للجمهور

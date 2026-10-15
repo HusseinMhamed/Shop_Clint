@@ -1,35 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
 import { useDispatch } from "react-redux";
-import { loading, close } from "../../../slices/SuccessFaildState/SFS.ts";
-import { Tag, Star, ArrowRight, Percent } from "lucide-react"; // أيقونات إضافية لمظهر أفضل
+import { loading, close } from "../../../slices/SuccessFaildState/SFS.js";
+import { Tag, Star, ArrowRight } from "lucide-react";
 import { open } from "../../../slices/ContactSlice.js";
 
-// تحديث الـ Interface بناءً على الإسكيمة الجديدة
-export interface IProduct {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  isFeatured: boolean;
-  discountPercentage: number;
-  priceAfterDiscount: number;
-  priority: number;
-  type: any; // استخدمت any لأن الباك إند قد يرسل كائن (Populated) أو ID
-  category: any;
-  model: any;
-  createdAt: string;
-  updatedAt: string;
-}
-
-const ProductDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const ProductDetails = () => {
+  const { id } = useParams();
   const dispatch = useDispatch();
-  const [product, setProduct] = useState<IProduct | null>(null);
-  const [activeImage, setActiveImage] = useState<string>("");
+  const [product, setProduct] = useState(null);
+  const [activeImage, setActiveImage] = useState("");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,7 +39,6 @@ const ProductDetails: React.FC = () => {
       </div>
     );
 
-  // التأكد من وجود خصم
   const hasDiscount = product.discountPercentage > 0;
 
   return (
@@ -66,17 +47,14 @@ const ProductDetails: React.FC = () => {
       dir="rtl"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* القسم الأيمن: معرض الصور */}
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-3xl border border-gray-700 bg-[#1e293b] group">
-            {/* شارة المنتج المميز */}
             {product.isFeatured && (
               <div className="absolute top-4 right-4 z-10 bg-yellow-500 text-black px-4 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg">
                 <Star size={16} fill="currentColor" /> مميز
               </div>
             )}
 
-            {/* شارة الخصم */}
             {hasDiscount && (
               <div className="absolute top-4 left-4 z-10 bg-red-600 text-white px-3 py-1 rounded-lg text-lg font-black shadow-lg animate-bounce">
                 {product.discountPercentage}%-
@@ -90,7 +68,6 @@ const ProductDetails: React.FC = () => {
             />
           </div>
 
-          {/* المصغرات */}
           <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar p-4">
             {product.images.map((img, index) => (
               <button
@@ -112,7 +89,6 @@ const ProductDetails: React.FC = () => {
           </div>
         </div>
 
-        {/* القسم الأيسر: تفاصيل المنتج */}
         <div className="flex flex-col space-y-6">
           <div>
             <nav className="flex items-center text-sm text-gray-400 mb-4 gap-2 bg-[#1e293b] w-fit px-4 py-1.5 rounded-full border border-gray-700">
@@ -133,7 +109,6 @@ const ProductDetails: React.FC = () => {
               {product.name}
             </h1>
 
-            {/* عرض السعر الجديد */}
             <div className="flex items-end gap-4 mb-2">
               <p className="text-4xl text-green-400 font-black tracking-tight">
                 {(product.priceAfterDiscount || product.price).toLocaleString()}{" "}

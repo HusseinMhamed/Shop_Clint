@@ -1,39 +1,19 @@
 import { useEffect, useState } from "react";
 import axios from "../AxiosApi.jsx";
 import { SERVER_URL } from "../Constant.js";
-import StoreStructureSidebar from "./StoreStructureSidebar.tsx";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import StoreStructureSidebar from "./StoreStructureSidebar.jsx";
+import { Link, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-interface IProduct {
-  _id: string;
-  name: string;
-  price: number;
-  description: string;
-  images: string[];
-  type: string;
-  category: string;
-  model: string;
-  // الحقول الجديدة التي أضفناها للسكيما
-  isFeatured?: boolean;
-  discountPercentage?: number;
-  priceAfterDiscount?: number;
-}
-
 const Products = () => {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [products, setProducts] = useState([]);
   const { userInfo } = useSelector((state) => state.auth);
 
   const filterByQueryParams = ({
     tId,
     cId,
     mId,
-  }: {
-    tId?: string;
-    cId?: string;
-    mId?: string;
   }) => {
     if (mId) {
       setSearchParams({
@@ -50,21 +30,24 @@ const Products = () => {
     }
   };
 
-  async function fetchProducts() {
-    try {
-      const OBG = Object.fromEntries(searchParams.entries());
-      let URLrequest = `${SERVER_URL}/products/all?`;
-      for (let i in OBG) URLrequest += `${i}=${OBG[i]}&`;
-      URLrequest = URLrequest.slice(0, -1);
-      const response = await axios.get(URLrequest);
-      setProducts(response.data?.products || []);
-    } catch (error: any) {
-      console.error("Error fetching products:", error.message || error);
-    }
-  }
-
   useEffect(() => {
+    let ignore = false;
+    const fetchProducts = async () => {
+      try {
+        const OBG = Object.fromEntries(searchParams.entries());
+        let URLrequest = `${SERVER_URL}/products/all?`;
+        for (let i in OBG) URLrequest += `${i}=${OBG[i]}&`;
+        URLrequest = URLrequest.slice(0, -1);
+        const response = await axios.get(URLrequest);
+        if (!ignore) setProducts(response.data?.products || []);
+      } catch (error) {
+        console.error("Error fetching products:", error.message || error);
+      }
+    };
     fetchProducts();
+    return () => {
+      ignore = true;
+    };
   }, [searchParams]);
 
   return (

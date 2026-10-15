@@ -1,19 +1,9 @@
-import React, { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
 import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../../Store.Types.ts";
-import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
+import { close, loading } from "../../../slices/SuccessFaildState/SFS.js";
 
-interface ProductData {
-  name: string;
-  price: string;
-  selectedTypeIndex: number;
-  selectedCategoryIndex: number;
-  selectedModelIndex: number;
-  description: string;
-  images: File[];
-}
 const initialFormErrors = {
   name: "",
   price: "",
@@ -23,7 +13,8 @@ const initialFormErrors = {
   description: "",
   images: "",
 };
-const initialFormData: ProductData = {
+
+const initialFormData = {
   name: "",
   price: "",
   selectedTypeIndex: -1,
@@ -32,41 +23,29 @@ const initialFormData: ProductData = {
   description: "",
   images: [],
 };
-interface IType {
-  _id: string;
-  name: string;
-}
-interface ICategory extends IType {
-  parentType: string;
-}
-interface IModel extends IType {
-  parentCategory: string;
-}
-function NewProduct() {
-  const Dispatch = useDispatch<AppDispatch>();
 
-  const [formData, setFormData] = useState<ProductData>(initialFormData);
+function NewProduct() {
+  const Dispatch = useDispatch();
+
+  const [formData, setFormData] = useState(initialFormData);
 
   const [formErrors, setFormErrors] = useState(initialFormErrors);
 
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [previews, setPreviews] = useState([]);
 
-  const [types, setTypes] = useState<IType[]>([]);
-  // const categories: ICategory[] = [];
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  // const models: IModel[] = [];
-  const [models, setModels] = useState<IModel[]>([]);
+  const [types, setTypes] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [models, setModels] = useState([]);
 
   useEffect(() => {
     const fetchTypes = async () => {
       Dispatch(loading());
-      // هنا يتم جلب الأنواع من الـ API أو Redux
       try {
         const response = await axios.get(
           `${SERVER_URL}/productsmetadata/types`,
         );
         setTypes(response.data?.data || []);
-      } catch (error: any) {
+      } catch (error) {
         console.log("Error fetching types:", error.response || error);
       }
       Dispatch(close());
@@ -74,11 +53,8 @@ function NewProduct() {
     fetchTypes();
   }, []);
 
-  const handleInputChange = async (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    // console.log("Input changed:", name, value);
     if (name === "price" && Number(value) < 0) return;
     setFormData((prev) => ({
       ...prev,
@@ -93,9 +69,7 @@ function NewProduct() {
 
     if (name === "selectedTypeIndex") {
       const selectedTypeIndex = Number(value);
-      // console.log("Selected type index:", selectedTypeIndex);
       Dispatch(loading());
-      // هنا يتم جلب الفئات من الـ API أو Redux
       try {
         const response = await axios.get(
           `${SERVER_URL}/productsmetadata/categories/${selectedTypeIndex >= 0 ? types[selectedTypeIndex]?._id : ""}`,
@@ -106,8 +80,7 @@ function NewProduct() {
           selectedCategoryIndex: -1,
           selectedModelIndex: -1,
         }));
-        // setFormData(initialFormData);
-      } catch (error: any) {
+      } catch (error) {
         console.log("Error fetching categories:", error.response || error);
       }
       Dispatch(close());
@@ -123,13 +96,14 @@ function NewProduct() {
           ...prev,
           selectedModelIndex: -1,
         }));
-      } catch (error: any) {
+      } catch (error) {
         console.log("Error fetching models:", error.response || error);
       }
       Dispatch(close());
     }
   };
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+
+  const handleImageChange = (e) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
       setFormData((prev) => ({
@@ -144,7 +118,7 @@ function NewProduct() {
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index) => {
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
@@ -152,56 +126,33 @@ function NewProduct() {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send formData to your backend API
 
     setFormErrors(initialFormErrors);
     let errorObj = {};
     if (!formData.name)
-      // setFormErrors((prev) => ({ ...prev, name: "Product name is required." }));
       errorObj = { name: "Product name is required." };
     if (!formData.price)
-      // setFormErrors((prev) => ({ ...prev, price: "Price is required." }));
       errorObj = { ...errorObj, price: "Price is required." };
     if (formData.images.length === 0)
-      // setFormErrors((prev) => ({
-      //   ...prev,
-      //   images: "At least one image is required.",
-      // }));
       errorObj = { ...errorObj, images: "At least one image is required." };
     if (formData.images.length > 6)
-      // setFormErrors((prev) => ({
-      //   ...prev,
-      //   images: "You can upload a maximum of 6 images.",
-      // }));
       errorObj = {
         ...errorObj,
         images: "You can upload a maximum of 6 images.",
       };
     if (formData.selectedTypeIndex < 0)
-      // setFormErrors((prev) => ({
-      //   ...prev,
-      //   type: "Please select a type.",
-      // }));
       errorObj = {
         ...errorObj,
         type: "Please select a type.",
       };
     if (formData.selectedCategoryIndex < 0)
-      // setFormErrors((prev) => ({
-      //   ...prev,
-      //   category: "Please select a category.",
-      // }));
       errorObj = {
         ...errorObj,
         category: "Please select a category.",
       };
     if (formData.selectedModelIndex < 0)
-      // setFormErrors((prev) => ({
-      //   ...prev,
-      //   model: "Please select a model.",
-      // }));
       errorObj = {
         ...errorObj,
         model: "Please select a model.",
@@ -216,9 +167,7 @@ function NewProduct() {
       return;
     }
     Dispatch(loading());
-    // console.log("Submitting product:", formData);
     try {
-      // Reset form after submission
       const formDataSend = new FormData();
       formDataSend.append("name", formData.name);
       formDataSend.append("price", formData.price);
@@ -239,7 +188,7 @@ function NewProduct() {
         });
       }
 
-      const response = await axios.post(
+      await axios.post(
         `${SERVER_URL}/products/create`,
         formDataSend,
         {
@@ -248,11 +197,10 @@ function NewProduct() {
           },
         },
       );
-      // console.log("Product created successfully:", response.data);
       setFormData(initialFormData);
       setPreviews([]);
       setTimeout(() => alert("تمت إضافة المنتج بنجاح"), 500);
-    } catch (error: any) {
+    } catch (error) {
       console.log(
         "Error creating product:",
         error.response.data.message || error,
@@ -261,9 +209,9 @@ function NewProduct() {
     }
     Dispatch(close());
   };
+
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
-      {/* Product Name */}
       <div>
         <input
           type="text"
@@ -278,7 +226,6 @@ function NewProduct() {
         )}
       </div>
 
-      {/* Type Name */}
       <div>
         <select
           name="selectedTypeIndex"
@@ -299,7 +246,7 @@ function NewProduct() {
           <p className="text-red-500 text-sm">{formErrors.type}</p>
         )}
       </div>
-      {/* categorie Name */}
+
       <div>
         <select
           name="selectedCategoryIndex"
@@ -320,7 +267,7 @@ function NewProduct() {
           <p className="text-red-500 text-sm">{formErrors.category}</p>
         )}
       </div>
-      {/* model Name */}
+
       <div>
         <select
           name="selectedModelIndex"
@@ -342,7 +289,6 @@ function NewProduct() {
         )}
       </div>
 
-      {/* Price */}
       <div>
         <input
           type="number"
@@ -357,7 +303,6 @@ function NewProduct() {
         )}
       </div>
 
-      {/* Description */}
       <div>
         <textarea
           name="description"
@@ -369,7 +314,6 @@ function NewProduct() {
         ></textarea>
       </div>
 
-      {/* Multiple Image Upload */}
       <div className="space-y-3">
         <label className="block text-sm font-medium text-gray-700">
           Upload Images
@@ -410,7 +354,6 @@ function NewProduct() {
         </div>
       </div>
 
-      {/* Image Previews */}
       {previews.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mt-4">
           {previews.map((src, index) => (
@@ -444,7 +387,6 @@ function NewProduct() {
         </div>
       )}
 
-      {/* Submit Button */}
       <button
         type="submit"
         className="w-full bg-[#1d70d2] hover:bg-[#155ab0] text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors uppercase tracking-wider mt-6"

@@ -1,26 +1,11 @@
-import React, {
+import {
   useEffect,
   useState,
-  type ChangeEvent,
-  type FormEvent,
 } from "react";
 import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../../Store.Types.ts";
-import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
+import { close, loading } from "../../../slices/SuccessFaildState/SFS.js";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
-
-interface IType {
-  _id: string;
-  name: string;
-}
-interface ICategory extends IType {
-  parentType: string;
-}
-interface IModel extends IType {
-  parentCategory: string;
-}
-
 
 const initialFormData = {
   selectedTypeIndex: -1,
@@ -28,18 +13,15 @@ const initialFormData = {
   selectedModelIndex: -1,
 };
 
-const DeleteCategoryStructure: React.FC = () => {
-  const Dispatch = useDispatch<AppDispatch>();
-  const [activeTab, setActiveTab] = useState<"type" | "category" | "model">(
-    "type",
-  );
+const DeleteCategoryStructure = () => {
+  const Dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState("type");
 
   const [formData, setFormData] = useState(initialFormData);
-  const [types, setTypes] = useState<IType[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [models, setModels] = useState<IModel[]>([]);
+  const [types, setTypes] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [models, setModels] = useState([]);
 
-  // جلب الأنواع عند تحميل الصفحة أو تغيير التبويب
   useEffect(() => {
     const fetchTypes = async () => {
       Dispatch(loading());
@@ -48,8 +30,8 @@ const DeleteCategoryStructure: React.FC = () => {
           `${SERVER_URL}/productsmetadata/types`,
         );
         setTypes(response.data?.data || []);
-        setFormData(initialFormData); // إعادة تعيين الاختيارات
-      } catch (error: any) {
+        setFormData(initialFormData);
+      } catch (error) {
         console.error("Error fetching types:", error);
       }
       Dispatch(close());
@@ -57,14 +39,13 @@ const DeleteCategoryStructure: React.FC = () => {
     fetchTypes();
   }, [activeTab]);
 
-  const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleInputChange = (e) => {
     const value = parseInt(e.target.value);
     const name = e.target.name;
 
     if (name === "selectedTypeIndex") {
       setFormData({ ...initialFormData, selectedTypeIndex: value });
 
-      // جلب الفئات إذا كنا في تبويب الفئة أو الموديل
       if ((activeTab === "category" || activeTab === "model") && value !== -1) {
         fetchCategories(types[value]?._id || "");
       }
@@ -75,7 +56,6 @@ const DeleteCategoryStructure: React.FC = () => {
         selectedModelIndex: -1,
       });
 
-      // جلب الموديلات إذا كنا في تبويب الموديل
       if (activeTab === "model" && value !== -1) {
         fetchModels(categories[value]?._id || "");
       }
@@ -84,7 +64,7 @@ const DeleteCategoryStructure: React.FC = () => {
     }
   };
 
-  const fetchCategories = async (typeId: string) => {
+  const fetchCategories = async (typeId) => {
     Dispatch(loading());
     try {
       const response = await axios.get(
@@ -97,10 +77,9 @@ const DeleteCategoryStructure: React.FC = () => {
     Dispatch(close());
   };
 
-  const fetchModels = async (categoryId: string) => {
+  const fetchModels = async (categoryId) => {
     Dispatch(loading());
     try {
-      // افترضت هنا مسار جلب الموديلات بناءً على الفئة
       const response = await axios.get(
         `${SERVER_URL}/productsmetadata/models/${categoryId}`,
       );
@@ -111,10 +90,9 @@ const DeleteCategoryStructure: React.FC = () => {
     Dispatch(close());
   };
 
-  const handleDelete = async (e: FormEvent) => {
+  const handleDelete = async (e) => {
     e.preventDefault();
 
-    // التأكد من اختيار العنصر المراد حذفه
     let idToDelete = "";
     let endpoint = "";
 
@@ -141,17 +119,14 @@ const DeleteCategoryStructure: React.FC = () => {
     )
       return;
 
-    // console.log(idToDelete, endpoint);
     Dispatch(loading());
     try {
       await axios.delete(
         `${SERVER_URL}/productsmetadata/${endpoint}/${idToDelete}`,
       );
-      //   alert("تم الحذف بنجاح");
       setFormData(initialFormData);
-      // إعادة تحديث القوائم بعد الحذف
       setActiveTab(activeTab);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting:", error);
       alert(`فشل الحذف : ${error.message || ""}`);
     }
@@ -175,9 +150,8 @@ const DeleteCategoryStructure: React.FC = () => {
         </p>
       </div>
 
-      {/* Tabs Switcher */}
       <div className="flex space-x-2 mb-6 bg-[#0f172a] p-1 rounded-lg flex-row-reverse">
-        {(["model", "category", "type"] as const).map((tab) => (
+        {["model", "category", "type"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -198,7 +172,6 @@ const DeleteCategoryStructure: React.FC = () => {
 
       <form onSubmit={handleDelete} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* اختيار النوع - يظهر دائماً لأن الفئات والموديلات تعتمد عليه */}
           <select
             name="selectedTypeIndex"
             value={formData.selectedTypeIndex}
@@ -215,7 +188,6 @@ const DeleteCategoryStructure: React.FC = () => {
             ))}
           </select>
 
-          {/* اختيار الفئة - يظهر في تبويب الفئة والموديل */}
           {(activeTab === "category" || activeTab === "model") && (
             <select
               name="selectedCategoryIndex"
@@ -235,7 +207,6 @@ const DeleteCategoryStructure: React.FC = () => {
             </select>
           )}
 
-          {/* اختيار الموديل - يظهر فقط في تبويب الموديل */}
           {activeTab === "model" && (
             <select
               name="selectedModelIndex"

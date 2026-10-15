@@ -8,14 +8,14 @@ import { useSelector } from "react-redux";
 import Login from "./components/Login.jsx";
 import Register from "./components/Register.jsx";
 import Navbar from "./components/navbar.jsx";
-import Dashboard from "./components/Dashbord/Dashboard";
-import Products from "./components/Products.tsx";
+import Dashboard from "./components/Dashbord/Dashboard.jsx";
+import Products from "./components/Products.jsx";
 import "./App.css";
 import Loading from "./Loading.jsx";
 import ResponseStateModal from "./ResponseStateModal.jsx";
-import ProductDetails from "./components/Dashbord/components/ProductDetails.tsx";
-import EditDeleteProduct from "./components/Dashbord/components/EditDeleteProduct.tsx";
-import DynamicContactManager from "./components/Dashbord/components/DynamicContactManager.tsx";
+import ProductDetails from "./components/Dashbord/components/ProductDetails.jsx";
+import EditDeleteProduct from "./components/Dashbord/components/EditDeleteProduct.jsx";
+import DynamicContactManager from "./components/Dashbord/components/DynamicContactManager.jsx";
 import ContactSection from "./components/Dashbord/components/ContactOverlay.jsx";
 
 function App() {

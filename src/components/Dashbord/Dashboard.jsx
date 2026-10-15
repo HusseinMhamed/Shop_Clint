@@ -1,8 +1,8 @@
 import { useState } from "react";
-import NewProduct from "./components/NewProduct.tsx";
-import AddCategoryStructure from "./components/AddCategoryStructure.tsx";
-import DeleteCategoryStructure from "./components/DeleteCategoryStructure.tsx";
-import EditCategoryStructure from "./components/EditCategoryStructure.tsx";
+import NewProduct from "./components/NewProduct.jsx";
+import AddCategoryStructure from "./components/AddCategoryStructure.jsx";
+import DeleteCategoryStructure from "./components/DeleteCategoryStructure.jsx";
+import EditCategoryStructure from "./components/EditCategoryStructure.jsx";
 
 const List = [
   {
@@ -30,9 +30,9 @@ const List = [
     component: <EditCategoryStructure />,
   },
 ];
-const AdminDashboard: React.FC = () => {
+const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
-  function handleTabChange(index: number) {
+  function handleTabChange(index) {
     setActiveTab(index);
   }
   return (

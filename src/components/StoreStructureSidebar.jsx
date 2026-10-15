@@ -12,48 +12,25 @@ import axios from "../AxiosApi.jsx";
 import { SERVER_URL } from "../Constant.js";
 import { useSearchParams } from "react-router-dom"; // استيراد الهوك المطلوب
 
-interface IModel {
-  _id: string;
-  name: string;
-}
-interface ICategory {
-  _id: string;
-  name: string;
-  models: IModel[];
-}
-interface IType {
-  _id: string;
-  name: string;
-  categories: ICategory[];
-}
-
 const StoreStructureSidebar = ({
   filterByQueryParams,
-}: {
-  filterByQueryParams: (params: {
-    tId?: string;
-    cId?: string;
-    mId?: string;
-  }) => void;
 }) => {
-  const [openTypes, setOpenTypes] = useState<Record<string, boolean>>({});
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
-    {},
-  );
-  const [structure, setStructure] = useState<IType[]>([]);
+  const [openTypes, setOpenTypes] = useState({});
+  const [openCategories, setOpenCategories] = useState({});
+  const [structure, setStructure] = useState([]);
 
   // حالة جديدة للتحكم في ظهور القائمة في الموبايل
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const [searchParams] = useSearchParams();
   // ربط الـ Active States بالـ URL مباشرة أو بالـ State
-  const [activeType, setActiveType] = useState<string | null>(
+  const [activeType, setActiveType] = useState(
     searchParams.get("type"),
   );
-  const [activeCategory, setActiveCategory] = useState<string | null>(
+  const [activeCategory, setActiveCategory] = useState(
     searchParams.get("category"),
   );
-  const [activeModel, setActiveModel] = useState<string | null>(
+  const [activeModel, setActiveModel] = useState(
     searchParams.get("model"),
   );
 
@@ -89,7 +66,7 @@ const StoreStructureSidebar = ({
         }
 
         setStructure(treeType);
-      } catch (error: any) {
+      } catch (error) {
         console.error(
           "Error fetching store structure:",
           error.message || error,
@@ -99,29 +76,29 @@ const StoreStructureSidebar = ({
     fetchStructure();
   }, []);
 
-  const toggleType = (id: string) => {
+  const toggleType = (id) => {
     setOpenTypes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const toggleCategory = (id: string) => {
+  const toggleCategory = (id) => {
     setOpenCategories((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleChosenType = (tId: string) => {
+  const handleChosenType = (tId) => {
     setActiveType(tId);
     setActiveCategory(null);
     setActiveModel(null);
     filterByQueryParams({ tId: tId });
   };
 
-  const handleChosenCategory = (tId: string, cId: string) => {
+  const handleChosenCategory = (tId, cId) => {
     setActiveType(tId);
     setActiveCategory(cId);
     setActiveModel(null);
     filterByQueryParams({ cId, tId });
   };
 
-  const handleChosenModel = (tId: string, cId: string, mId: string) => {
+  const handleChosenModel = (tId, cId, mId) => {
     setActiveType(tId);
     setActiveCategory(cId);
     setActiveModel(mId);

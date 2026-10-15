@@ -1,62 +1,38 @@
-import React, {
+import {
   useEffect,
   useState,
-  type ChangeEvent,
-  type FormEvent,
 } from "react";
 import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../../Store.Types.ts";
-import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
-// import axios from "axios";
+import { close, loading } from "../../../slices/SuccessFaildState/SFS.js";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
-// تعريف أنواع البيانات لتتوافق مع الـ Mongoose Schema
-interface IType {
-  _id: string;
-  name: string;
-}
-// const apiUrl = "http://localhost:5000";
-interface ICategory extends IType {
-  parentType: string;
-}
-interface IModel extends IType {
-  parentCategory: string;
-}
+
 const initialFormData = {
   name: "",
   selectedTypeIndex: -1,
   selectedCategoryIndex: -1,
 };
 
-const AddCategoryStructure: React.FC = () => {
-  const Dispatch = useDispatch<AppDispatch>();
-  const [activeTab, setActiveTab] = useState<"type" | "category" | "model">(
-    "type",
-  );
+const AddCategoryStructure = () => {
+  const Dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState("type");
 
-  // حالات الإدخال
   const [formData, setFormData] = useState(initialFormData);
 
-  // مثال لبيانات تجريبية (سيتم جلبها لاحقاً من Redux أو API)
-  // const types: IType[] = [];
-  const [types, setTypes] = useState<IType[]>([]);
-  // const categories: ICategory[] = [];
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [types, setTypes] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     if (activeTab === "category" || activeTab === "model") {
       const fetchTypes = async () => {
         Dispatch(loading());
-        // هنا يتم جلب الأنواع من الـ API أو Redux
         try {
           const response = await axios.get(
             `${SERVER_URL}/productsmetadata/types`,
           );
-          // console.log("00000000", response.data);
           setTypes(response.data?.data || []);
           setFormData(initialFormData);
-          // setTimeout(() => alert("تم الحفظ بنجاح"), 500);
-        } catch (error: any) {
+        } catch (error) {
           console.log("Error fetching types:", error.response || error);
           setTimeout(
             () => alert("هناك مشكلة : " + error.response.data.message || error),
@@ -70,7 +46,7 @@ const AddCategoryStructure: React.FC = () => {
   }, [activeTab]);
 
   const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e,
   ) => {
     if (e.target.name === "name") {
       setFormData({
@@ -87,23 +63,19 @@ const AddCategoryStructure: React.FC = () => {
       const selectedTypeIndex = parseInt(e.target.value);
       setFormData({
         ...formData,
-        selectedCategoryIndex: -1, // إعادة تعيين الفئة المحددة عند تغيير النوع
+        selectedCategoryIndex: -1,
         selectedTypeIndex,
       });
       if (activeTab === "model" && selectedTypeIndex !== -1) {
         console.log("Fetching categories for type index:", selectedTypeIndex);
         const fetchCategories = async () => {
           Dispatch(loading());
-          // هنا يتم جلب الفئات من الـ API أو Redux
           try {
             const response = await axios.get(
               `${SERVER_URL}/productsmetadata/categories/${selectedTypeIndex !== -1 ? types[selectedTypeIndex]?._id : ""}`,
             );
-            // console.log("1111111111", response.data);
             setCategories(response.data?.data || []);
-            // setTimeout(() => alert("تم الحفظ بنجاح"), 500);
-            // setFormData(initialFormData);
-          } catch (error: any) {
+          } catch (error) {
             console.log("Error fetching categories:", error.response || error);
           }
           Dispatch(close());
@@ -113,22 +85,20 @@ const AddCategoryStructure: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Sending Data:", formData);
     Dispatch(loading());
     if (activeTab === "type") {
-      // إرسال طلب لإنشاء نوع جديد
       try {
-        const response = await axios.post(
+        await axios.post(
           `${SERVER_URL}/productsmetadata/types`,
           {
             name: formData.name,
           },
         );
-        // console.log("Type created successfully:", response.data);
         setTimeout(() => alert("تم الحفظ بنجاح"), 500);
-      } catch (error: any) {
+      } catch (error) {
         console.log("Error creating type:", error.response || error);
         setTimeout(
           () => alert("هناك مشكلة : " + error.response.data.message || error),
@@ -136,21 +106,19 @@ const AddCategoryStructure: React.FC = () => {
         );
       }
     } else if (activeTab === "category") {
-      // إرسال طلب لإنشاء فئة جديدة
       try {
         if (formData.selectedTypeIndex === -1) {
           throw new Error("Please select a type for the category.");
         }
-        const response = await axios.post(
+        await axios.post(
           `${SERVER_URL}/productsmetadata/categories`,
           {
             name: formData.name,
             typeId: types[formData.selectedTypeIndex]?._id || "",
           },
         );
-        // console.log("Category created successfully:", response.data);
         setTimeout(() => alert("تم الحفظ بنجاح"), 500);
-      } catch (error: any) {
+      } catch (error) {
         console.log("Error creating category:", error.response || error);
         setTimeout(
           () => alert("هناك مشكلة : " + error.response.data.message || error),
@@ -165,16 +133,15 @@ const AddCategoryStructure: React.FC = () => {
         ) {
           throw new Error("Please select a type and category for the model.");
         }
-        const response = await axios.post(
+        await axios.post(
           `${SERVER_URL}/productsmetadata/models`,
           {
             name: formData.name,
             categoryId: categories[formData.selectedCategoryIndex]?._id || "",
           },
         );
-        // console.log("Model created successfully:", response.data);
         setTimeout(() => alert("تم الحفظ بنجاح"), 500);
-      } catch (error: any) {
+      } catch (error) {
         console.log(
           "Error creating model:",
           error.response.data.message || error,
@@ -194,9 +161,8 @@ const AddCategoryStructure: React.FC = () => {
       className="w-full mt-6 bg-[#1e293b]/20 p-6 rounded-xl border border-gray-700 backdrop-blur-sm"
       dir="rtl"
     >
-      {/* Tabs Switcher */}
       <div className="flex space-x-2 mb-6 bg-[#0f172a] p-1 rounded-lg">
-        {(["type", "category", "model"] as const).map((tab) => (
+        {["type", "category", "model"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -215,7 +181,6 @@ const AddCategoryStructure: React.FC = () => {
         ))}
       </div>
 
-      {/* Form Content */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {activeTab !== "type" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

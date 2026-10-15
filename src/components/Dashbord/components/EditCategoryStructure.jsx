@@ -1,43 +1,27 @@
-import React, {
+import {
   useEffect,
   useState,
-  type ChangeEvent,
-  type FormEvent,
 } from "react";
 import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../../Store.Types.ts";
-import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
+import { close, loading } from "../../../slices/SuccessFaildState/SFS.js";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
-
-interface IType {
-  _id: string;
-  name: string;
-}
-interface ICategory extends IType {
-  parentType: string;
-}
-interface IModel extends IType {
-  parentCategory: string;
-}
 
 const initialFormData = {
   selectedTypeIndex: -1,
   selectedCategoryIndex: -1,
   selectedModelIndex: -1,
-  newName: "", // الاسم الجديد بعد التعديل
+  newName: "",
 };
 
-const EditCategoryStructure: React.FC = () => {
-  const Dispatch = useDispatch<AppDispatch>();
-  const [activeTab, setActiveTab] = useState<"type" | "category" | "model">(
-    "type",
-  );
+const EditCategoryStructure = () => {
+  const Dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState("type");
 
   const [formData, setFormData] = useState(initialFormData);
-  const [types, setTypes] = useState<IType[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [models, setModels] = useState<IModel[]>([]);
+  const [types, setTypes] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [models, setModels] = useState([]);
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -48,7 +32,7 @@ const EditCategoryStructure: React.FC = () => {
         );
         setTypes(response.data?.data || []);
         setFormData(initialFormData);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error fetching types:", error);
       }
       Dispatch(close());
@@ -56,7 +40,7 @@ const EditCategoryStructure: React.FC = () => {
     fetchTypes();
   }, [activeTab]);
 
-  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = (e) => {
     const value = parseInt(e.target.value);
     const name = e.target.name;
 
@@ -91,7 +75,7 @@ const EditCategoryStructure: React.FC = () => {
     }
   };
 
-  const fetchCategories = async (typeId: string) => {
+  const fetchCategories = async (typeId) => {
     Dispatch(loading());
     try {
       const response = await axios.get(
@@ -104,7 +88,7 @@ const EditCategoryStructure: React.FC = () => {
     Dispatch(close());
   };
 
-  const fetchModels = async (categoryId: string) => {
+  const fetchModels = async (categoryId) => {
     Dispatch(loading());
     try {
       const response = await axios.get(
@@ -117,7 +101,7 @@ const EditCategoryStructure: React.FC = () => {
     Dispatch(close());
   };
 
-  const handleEdit = async (e: FormEvent) => {
+  const handleEdit = async (e) => {
     e.preventDefault();
 
     let idToEdit = "";
@@ -149,11 +133,11 @@ const EditCategoryStructure: React.FC = () => {
         },
       );
       setFormData(initialFormData);
-      setActiveTab(activeTab); // لإعادة التحميل
+      setActiveTab(activeTab);
       setTimeout(() => {
         alert("تم التعديل بنجاح");
       }, 500);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error editing:", error);
 
       setTimeout(() => {
@@ -173,7 +157,7 @@ const EditCategoryStructure: React.FC = () => {
       </h2>
 
       <div className="flex space-x-2 mb-6 bg-[#0f172a] p-1 rounded-lg flex-row-reverse">
-        {(["model", "category", "type"] as const).map((tab) => (
+        {["model", "category", "type"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -249,7 +233,6 @@ const EditCategoryStructure: React.FC = () => {
           )}
         </div>
 
-        {/* حقل إدخال الاسم الجديد يظهر عند اختيار أي عنصر */}
         {(formData.newName !== "" ||
           (activeTab === "type" && formData.selectedTypeIndex !== -1)) && (
           <div className="animate-in fade-in slide-in-from-top-2 duration-300">

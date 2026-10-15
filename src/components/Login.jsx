@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../slices/authApiSlice";
 import { setCredentials } from "../slices/authSlice";
@@ -70,9 +70,11 @@ const Login = () => {
           </button>
         </form>
 
-        {/* <div className="login-footer">
-          <p>Don't have an account? <Link to="/register">Sign up</Link></p>
-        </div> */}
+        <div className="login-footer">
+          <p>
+            Don't have an account? <Link to="/register">Sign up</Link>
+          </p>
+        </div>
       </div>
 
       {/* Background aesthetic elements */}

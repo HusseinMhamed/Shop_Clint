@@ -1,35 +1,11 @@
-import React, { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
 import { useDispatch } from "react-redux";
-import { loading, close } from "../../../slices/SuccessFaildState/SFS.ts";
+import { loading, close } from "../../../slices/SuccessFaildState/SFS.js";
 
-// interface/Product.ts
-
-export interface IProduct {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-
-  // الحقول الجديدة للإمكانيات الإضافية
-  isFeatured: boolean; // هل المنتج مميز
-  discountPercentage: number; // نسبة الخصم (0-100)
-  priceAfterDiscount: number; // يتم حسابه في الباك إند
-  priority: number; // ترتيب الظهور (الأولوية)
-
-  // العلاقات (تكون كائنات عند استخدام populate في الباك إند)
-  type: string;
-  category: string;
-  model: string;
-
-  createdAt: string;
-  updatedAt: string;
-}
-
-const initialFormState: IProduct = {
+const initialFormState = {
   _id: "",
   name: "",
   description: "",
@@ -42,20 +18,20 @@ const initialFormState: IProduct = {
   type: "",
   category: "",
   model: "",
-
   createdAt: "",
   updatedAt: "",
 };
-const ProductAdmin: React.FC = () => {
+
+const ProductAdmin = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const Dispatch = useDispatch();
 
-  const [product, setProduct] = useState<IProduct>(initialFormState);
+  const [product, setProduct] = useState(initialFormState);
   const [types, setTypes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [models, setModels] = useState([]);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const initData = async () => {
@@ -73,11 +49,9 @@ const ProductAdmin: React.FC = () => {
           type: prodData.type?._id || "",
           category: prodData.category?._id || "",
           model: prodData.model?._id || "",
-          // التأكد من وجود قيم افتراضية للحقول الجديدة
           isFeatured: prodData.isFeatured || false,
           discountPercentage: prodData.discountPercentage || 0,
         });
-        // console.log({ product, prodData });
 
         if (prodData.type?._id) fetchCategories(prodData.type._id);
         if (prodData.category?._id) fetchModels(prodData.category._id);
@@ -89,7 +63,7 @@ const ProductAdmin: React.FC = () => {
     initData();
   }, [id]);
 
-  const fetchCategories = async (typeId: string) => {
+  const fetchCategories = async (typeId) => {
     try {
       const res = await axios.get(
         `${SERVER_URL}/productsmetadata/categories/${typeId}`,
@@ -100,7 +74,7 @@ const ProductAdmin: React.FC = () => {
     }
   };
 
-  const fetchModels = async (categoryId: string) => {
+  const fetchModels = async (categoryId) => {
     try {
       const res = await axios.get(
         `${SERVER_URL}/productsmetadata/models/${categoryId}`,
@@ -111,32 +85,27 @@ const ProductAdmin: React.FC = () => {
     }
   };
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const { name, value, type } = e.target as HTMLInputElement;
+  const handleInputChange = (e) => {
+    const { name, value, type } = e.target;
 
-    let finalValue: any = value;
+    let finalValue = value;
 
-    // معالجة خاصية الـ checkbox لـ isFeatured
     if (type === "checkbox") {
-      finalValue = (e.target as HTMLInputElement).checked;
+      finalValue = e.target.checked;
     } else if (name === "price" || name === "discountPercentage") {
-      // منع القيم السالبة
       finalValue = Number(value) < 0 ? 0 : Number(value);
-      // منع تخطي نسبة الخصم لـ 100%
       if (name === "discountPercentage" && finalValue > 100) finalValue = 100;
     }
 
-    setProduct((prev: any) => ({ ...prev, [name]: finalValue }));
+    setProduct((prev) => ({ ...prev, [name]: finalValue }));
 
     if (errors[name]) {
-      setErrors((prev: any) => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
     if (name === "type") {
       fetchCategories(value);
-      setProduct((prev: any) => ({
+      setProduct((prev) => ({
         ...prev,
         type: value,
         category: "",
@@ -147,13 +116,13 @@ const ProductAdmin: React.FC = () => {
     }
     if (name === "category") {
       fetchModels(value);
-      setProduct((prev: any) => ({ ...prev, category: value, model: "" }));
+      setProduct((prev) => ({ ...prev, category: value, model: "" }));
       setModels([]);
     }
   };
 
   const validate = () => {
-    const newErrors: any = {};
+    const newErrors = {};
     if (!product.name) newErrors.name = "يجب إدخال اسم المنتج";
     if (!product.price || product.price <= 0)
       newErrors.price = "يجب إدخال سعر صحيح";
@@ -167,7 +136,7 @@ const ProductAdmin: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleUpdate = async (e: React.FormEvent) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
     if (!validate()) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -178,11 +147,10 @@ const ProductAdmin: React.FC = () => {
     try {
       await axios.put(`${SERVER_URL}/products/${id}`, product);
 
-      // alert("تم التحديث بنجاح");
       setTimeout(() => {
         alert("تم التحديث بنجاح");
       }, 500);
-    } catch (err: any) {
+    } catch (err) {
       setTimeout(() => {
         alert(
           "خطأ في التحديث: " + (err.response?.data?.message || err.message),
@@ -192,7 +160,7 @@ const ProductAdmin: React.FC = () => {
     Dispatch(close());
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (files) {
       const currentImagesCount = product.images?.length || 0;
@@ -203,18 +171,18 @@ const ProductAdmin: React.FC = () => {
       }
       const filesArray = Array.from(files).slice(0, remainingSlots);
       const newImagesPromises = filesArray.map((file) => {
-        return new Promise<string>((resolve) => {
+        return new Promise((resolve) => {
           const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
+          reader.onloadend = () => resolve(reader.result);
           reader.readAsDataURL(file);
         });
       });
       const newImagesBase64 = await Promise.all(newImagesPromises);
-      setProduct((prev: any) => ({
+      setProduct((prev) => ({
         ...prev,
         images: [...(prev.images || []), ...newImagesBase64],
       }));
-      setErrors((prev: any) => ({ ...prev, images: "" }));
+      setErrors((prev) => ({ ...prev, images: "" }));
     }
   };
 
@@ -223,7 +191,6 @@ const ProductAdmin: React.FC = () => {
   return (
     <div className="p-6 bg-[#0f172a] min-h-screen text-white" dir="rtl">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* القسم الأيمن: الصور */}
         <div className="lg:col-span-1 space-y-4">
           <h3
             className={`text-lg font-bold flex items-center gap-2 ${errors.images ? "text-red-500" : "text-indigo-400"}`}
@@ -234,7 +201,7 @@ const ProductAdmin: React.FC = () => {
           <div
             className={`grid grid-cols-2 gap-3 bg-[#1e293b] p-4 rounded-xl border ${errors.images ? "border-red-500" : "border-gray-700"}`}
           >
-            {product.images?.map((img: string, i: number) => (
+            {product.images?.map((img, i) => (
               <div key={i} className="relative group aspect-square">
                 <img
                   src={img}
@@ -246,18 +213,15 @@ const ProductAdmin: React.FC = () => {
                     type="button"
                     className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white w-6 h-6 rounded-full text-xs shadow-lg transition-transform hover:scale-110"
                     onClick={() => {
-                      // 3. منع حذف الصورة إذا كانت الأخيرة
-
                       if (product.images.length <= 1) {
                         alert(
                           "لا يمكن حذف آخر صورة، يجب أن يحتوي المنتج على صورة واحدة على الأقل.",
                         );
-
                         return;
                       }
 
                       const newImages = product.images.filter(
-                        (_: any, index: number) => index !== i,
+                        (_, index) => index !== i,
                       );
 
                       setProduct({ ...product, images: newImages });
@@ -293,10 +257,8 @@ const ProductAdmin: React.FC = () => {
           )}
         </div>
 
-        {/* القسم الأيسر: النموذج (تم تحديثه) */}
         <div className="lg:col-span-2 bg-[#1e293b] p-6 rounded-2xl border border-gray-700 shadow-2xl">
           <form onSubmit={handleUpdate} className="space-y-6">
-            {/* الحقول الأساسية */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">
@@ -323,9 +285,7 @@ const ProductAdmin: React.FC = () => {
               </div>
             </div>
 
-            {/* الحقول الجديدة: الخصم والتمييز والأولوية */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-[#0f172a]/50 p-4 rounded-xl border border-dashed border-gray-600 ">
-              {/* 1. نسبة الخصم */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1 font-bold ">
                   نسبة الخصم (%)
@@ -350,7 +310,6 @@ const ProductAdmin: React.FC = () => {
                 </p>
               </div>
 
-              {/* 2. تحديد الأولوية (المكان الجديد) */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1 font-bold ">
                   ترتيب الأولوية
@@ -368,7 +327,6 @@ const ProductAdmin: React.FC = () => {
                 </p>
               </div>
 
-              {/* 3. منتج مميز */}
               <div className="flex items-center gap-4 pt-6">
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -386,7 +344,6 @@ const ProductAdmin: React.FC = () => {
               </div>
             </div>
 
-            {/* التصنيفات */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">
@@ -401,7 +358,7 @@ const ProductAdmin: React.FC = () => {
                   <option value="" hidden>
                     اختر النوع
                   </option>
-                  {types.map((t: any) => (
+                  {types.map((t) => (
                     <option key={t._id} value={t._id}>
                       {t.name}
                     </option>
@@ -422,7 +379,7 @@ const ProductAdmin: React.FC = () => {
                   <option value="" hidden>
                     اختر الفئة
                   </option>
-                  {categories.map((c: any) => (
+                  {categories.map((c) => (
                     <option key={c._id} value={c._id}>
                       {c.name}
                     </option>
@@ -443,7 +400,7 @@ const ProductAdmin: React.FC = () => {
                   <option value="" hidden>
                     اختر الموديل
                   </option>
-                  {models.map((m: any) => (
+                  {models.map((m) => (
                     <option key={m._id} value={m._id}>
                       {m.name}
                     </option>
@@ -464,7 +421,6 @@ const ProductAdmin: React.FC = () => {
               />
             </div>
 
-            {/* الأزرار */}
             <div className="flex gap-4 pt-6 border-t border-gray-700">
               <button
                 type="submit"
@@ -482,7 +438,7 @@ const ProductAdmin: React.FC = () => {
                     try {
                       await axios.delete(`${SERVER_URL}/products/${id}`);
                       navigate("/products");
-                    } catch (err) {
+                    } catch {
                       alert("فشل الحذف");
                     }
                     Dispatch(close());

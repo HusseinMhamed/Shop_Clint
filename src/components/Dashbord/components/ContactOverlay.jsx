@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "../../../AxiosApi.jsx";
 import { SERVER_URL } from "../../../Constant.js";
 import {
@@ -8,15 +8,12 @@ import {
   Type,
   MessageCircle,
   X,
-  Loader2,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch } from "../../../Store.Types.ts";
-import { close, loading } from "../../../slices/SuccessFaildState/SFS.ts";
+import { close, loading } from "../../../slices/SuccessFaildState/SFS.js";
 import { open, close as Close } from "../../../slices/ContactSlice.js";
 
-// دالة الأيقونات
-const getIcon = (type: string) => {
+const getIcon = (type) => {
   switch (type) {
     case "email":
       return <Mail size={22} className="text-blue-600" />;
@@ -30,13 +27,9 @@ const getIcon = (type: string) => {
 };
 
 const FloatingContactSupport = () => {
-  // const [isOpen, setIsOpen] = useState(false);
-  const [contacts, setContacts] = useState<any[]>([]);
-  const [fetching, setFetching] = useState(false);
-  const dispatch = useDispatch<AppDispatch>();
+  const [contacts, setContacts] = useState([]);
+  const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.ContactReducer.openOverlay);
-
-  // console.log(isOpen2);
 
   useEffect(() => {
     if (isOpen) {
@@ -53,12 +46,10 @@ const FloatingContactSupport = () => {
     };
   }, [isOpen]);
 
-  // جلب البيانات عند فتح النافذة فقط لتقليل الضغط على السيرفر
   useEffect(() => {
     if (isOpen) {
       const fetchContacts = async () => {
         try {
-          setFetching(true);
           dispatch(loading());
           const response = await axios.get(
             `${SERVER_URL}/contact/contact-info`,
@@ -68,10 +59,9 @@ const FloatingContactSupport = () => {
           if (contactsData) {
             setContacts(contactsData);
           }
-        } catch (error: any) {
+        } catch (error) {
           console.error("Error fetching contacts:", error.message);
         } finally {
-          setFetching(false);
           dispatch(close());
         }
       };
@@ -81,7 +71,6 @@ const FloatingContactSupport = () => {
 
   return (
     <>
-      {/* 1. الزر العائم (Floating Button) - مثبت في أسفل اليسار */}
       <button
         title="تواصل معنا"
         onClick={() => dispatch(open())}
@@ -90,16 +79,11 @@ const FloatingContactSupport = () => {
         <MessageCircle size={28} />
       </button>
 
-      {/* 2. الـ Layout (Overlay) والنافذة */}
       {isOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all animate-in fade-in duration-300">
-          {/* خلفية للإغلاق عند الضغط خارج النافذة */}
           <div className="absolute inset-0" onClick={() => dispatch(Close())} />
 
-          {/* صفحة العرض (نفس تصميم المعاينة الخاص بك) */}
-          {/* 1. الأب الرئيسي - أزلنا منه overflow-hidden إذا كنت لا تحتاجه بشده أو أضفنا له padding بسيط */}
           <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl animate-in zoom-in duration-300">
-            {/* زر الإغلاق العلوي - زدنا الـ z-index لضمان ظهوره */}
             <button
               onClick={() => dispatch(Close())}
               className="absolute top-4 left-4 p-2 hover:bg-gray-100 rounded-full text-gray-500 z-50 transition"
@@ -107,7 +91,6 @@ const FloatingContactSupport = () => {
               <X size={20} />
             </button>
 
-            {/* 2. محتوى العرض - تأكد أن الـ rounded هنا متناسق مع الأب */}
             <div
               className="p-6 bg-white rounded-3xl border border-gray-200 shadow-sm"
               dir="rtl"
@@ -116,7 +99,6 @@ const FloatingContactSupport = () => {
                 <MessageCircle className="text-blue-600" /> بطاقة التواصل
               </h2>
 
-              {/* الكرت الداخلي المنقط */}
               <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 bg-gray-200">
                 <div className="text-center mb-6">
                   <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center text-blue-600 text-2xl font-bold">
@@ -130,7 +112,6 @@ const FloatingContactSupport = () => {
                   <p className="text-sm text-gray-500">نحن هنا لتنفيذ طلباتك</p>
                 </div>
 
-                {/* قائمة الحقول - أضفنا pl-2 بدلاً من pr-2 لأننا في وضع rtl */}
                 <div
                   className="space-y-4 max-h-[350px] overflow-y-auto p-2 custom-scrollbar"
                   dir="rtl"

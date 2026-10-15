@@ -1,13 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { SERVER_URL } from "../Constant.js";
 
 export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
-    // baseUrl: "http://localhost:5000",
-    baseUrl: "https://shop-server-gupk.onrender.com",
-    prepareHeaders: (headers) => {
-      headers.set("credentials", "include"); // يخبر المتصفح بالتعامل مع الكوكيز
-      return headers;
-    },
+    baseUrl: SERVER_URL,
+    // الاعتماد على خيار fetch credentials (وليس هيدر) لإرسال الكوكيز
     fetchFn: (url, options) =>
       fetch(url, { ...options, credentials: "include" }),
   }),
